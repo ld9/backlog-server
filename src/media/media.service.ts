@@ -50,7 +50,8 @@ export const update = async (id: string, itemUpdate: BaseMedia): Promise<MediaIt
         { '_id': item._id },
         {
             $set: { ...itemUpdate }
-        });
+        }
+    );
 
     return media.findOne({ '_id': item._id });
 }
