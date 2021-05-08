@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { MongoClient } from "mongodb";
 
 import { mediaRouter } from "./media/media.router";
+import { userRouter } from "./auth/user.router";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/media', mediaRouter);
+app.use('/user', userRouter);
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
