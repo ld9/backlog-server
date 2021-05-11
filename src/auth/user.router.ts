@@ -24,10 +24,10 @@ userRouter.post('/create', async (req: Request, res: Response) => {
 
 userRouter.post('/verify', async (req: Request, res: Response) => {
     try {
-        const email = await AuthService.verify(req.body.token);
+        const user = await AuthService.verify(req.body.token);
 
-        if (email != null) {
-            res.status(200).json({auth: email});
+        if (user != null) {
+            res.status(200).json({auth: user.auth.email});
         } else {
             res.status(401).json({auth: false});
         }

@@ -39,7 +39,7 @@ export const create = async (newUserRequest: BasicUserCreate, fingerprint: Finge
     const result = await users.insertOne(newUser);
     const createdUser = result.ops[0];
 
-    console.log(await sendWelcomeEmail(createdUser));
+    await sendWelcomeEmail(createdUser);
 
     const firstToken = await createNewToken(newUserRequest.email, 'normal', fingerprint);
 
@@ -92,7 +92,7 @@ export const createNewToken = async (email: String, tokenType?: String, fingerpr
     return token;
 }
 
-export const verify = async (token: String): Promise<String | null> => {
+export const verify = async (token: String): Promise<User | null> => {
 
     const db = client.db('backlog');
     const users = db.collection('users');
@@ -109,11 +109,7 @@ export const verify = async (token: String): Promise<String | null> => {
         }
     });
 
-    if (result != null) {
-        return result.auth.email;
-    } else {
-        return null;
-    }
+    return result;
 
 }
 
