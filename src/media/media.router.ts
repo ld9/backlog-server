@@ -5,8 +5,16 @@ import * as MediaService from "./media.service"
 export const mediaRouter = express.Router();
 
 mediaRouter.get("/", async (req: Request, res: Response) => {
+    const auth = req.headers.authorization;
+    const bt = auth?.split('Bearer ')[1];
+    
+    if (!bt) {
+        res.status(401).send();
+        return;
+    }
+
     try {
-        const items = await MediaService.findAll();
+        const items = await MediaService.findAllForUser(bt);
         res.status(200).send(items);
     } catch (e) {
         res.status(500).json({'error': e.message});

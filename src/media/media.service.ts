@@ -3,6 +3,26 @@ import { BaseMedia, MediaItem } from "./media.interface";
 
 import { ObjectId } from "mongodb";
 import { client } from '../index';
+import { verify } from "../auth/user.service";
+
+export const findAllForUser = async (token: string): Promise<MediaItem[]> => {
+
+    const user = await verify(token);
+    if (!user) {
+        return [];
+    }
+
+    const db = client.db('backlog');
+    const media = db.collection('media');
+    
+    const userMedia: Promise<MediaItem[]> = Promise.all(user.permissions.media.map((id: String): Promise<MediaItem> => {
+        return media.findOne({'_id': new ObjectId(id.toString())});
+    }));
+
+    // console.log(await userMedia);
+
+    return await userMedia;
+}
 
 export const findAll = async (): Promise<MediaItem[]> => {
     const db = client.db('backlog');
