@@ -27,7 +27,16 @@ userRouter.post('/verify', async (req: Request, res: Response) => {
         const user = await AuthService.verify(req.body.token);
 
         if (user != null) {
-            res.status(200).json({auth: user.auth.email});
+
+            const resUser = {
+                name: user.name,
+                permissions: user.permissions,
+                recent: user.recent
+            }
+
+            res.status(200).json({
+                auth: resUser
+            });
         } else {
             res.status(401).json({auth: false});
         }
