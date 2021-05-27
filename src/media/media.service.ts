@@ -5,11 +5,11 @@ import { ObjectId } from "mongodb";
 import { client } from '../index';
 import { verify } from "../auth/user.service";
 
-export const findAllForUser = async (token: string): Promise<MediaItem[]> => {
+export const findAllForUser = async (token: string): Promise<MediaItem[] | null> => {
 
     const user = await verify(token);
     if (!user) {
-        return [];
+        return null;
     }
 
     const db = client.db('backlog');
