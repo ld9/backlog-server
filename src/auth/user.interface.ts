@@ -1,11 +1,11 @@
 export interface BasicUser {
-    email: String;
-    password: String;
+    email: string;
+    password: string;
 }
 
 export interface Fingerprint {
-    ua: String;
-    ip: String;
+    ua: string;
+    ip: string;
     at: Date;
 }
 
@@ -25,14 +25,14 @@ export interface User {
 }
 
 export interface RecentLog {
-    mediaId: String;
+    mediaId: string;
     progress: number;
     at: Date;
 }
 
 export interface UserAuth {
-    email: String;
-    hash: String;
+    email: string;
+    hash: string;
 }
 
 export interface UserPermissions {
@@ -41,22 +41,23 @@ export interface UserPermissions {
         admin: boolean;
         paid: boolean;
     };
-    media: Array<String>;
-    collection: Array<String>;
+    media: Array<string>;
+    collection: Array<string>;
 }
 
 export interface PersonName {
-    first: String;
-    last: String;
-    middle?: String;
-    title?: String;
-    suffix?: String;
+    first: string;
+    last: string;
+    middle?: string;
+    title?: string;
+    suffix?: string;
 }
 
 export interface AuthToken {
     invalidated: Boolean;
     expires?: Date;
-    token: String;
+    token: string;
     fingerprint?: {}
-    type: String;
+    type: string;
+    bonus?: any;
 }

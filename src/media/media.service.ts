@@ -15,7 +15,7 @@ export const findAllForUser = async (token: string): Promise<MediaItem[] | null>
     const db = client.db('backlog');
     const media = db.collection('media');
     
-    const userMedia: Promise<MediaItem[]> = Promise.all(user.permissions.media.map((id: String): Promise<MediaItem> => {
+    const userMedia: Promise<MediaItem[]> = Promise.all(user.permissions.media.map((id: string): Promise<MediaItem> => {
         return media.findOne({'_id': new ObjectId(id.toString())});
     }));
 

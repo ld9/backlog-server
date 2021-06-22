@@ -5,6 +5,8 @@ import crypto from "crypto";
 
 import { client } from "../index";
 import { sendPasswordUpdatedEmail, sendResetPasswordEmail, sendWelcomeEmail } from "./email.service";
+import { MediaGroup } from "../collection/mediagroup.interface";
+import { find } from "../collection/mediagroup.service";
 dotenv.config();
 
 export const create = async (newUserRequest: BasicUserCreate, fingerprint: Fingerprint): Promise<AuthToken | null> => {
@@ -65,7 +67,7 @@ export const login = async (authUser: BasicUser, fingerprint: Fingerprint): Prom
 
 }
 
-export const createNewToken = async (email: String, tokenType?: String, fingerprint?: Fingerprint, validForMillis?: number): Promise<AuthToken> => {
+export const createNewToken = async (email: string, tokenType?: string, fingerprint?: Fingerprint, validForMillis?: number, bonus?: any): Promise<AuthToken> => {
 
     const ttl = validForMillis || (1000 * 60 * 60 * 24 * 7);
 
@@ -74,7 +76,8 @@ export const createNewToken = async (email: String, tokenType?: String, fingerpr
         expires: new Date(Date.now() + ttl),
         token: crypto.randomBytes(128).toString('hex'),
         fingerprint: fingerprint,
-        type: tokenType || 'normal'
+        type: tokenType || 'normal',
+        bonus: bonus
     }
 
     const db = client.db('backlog');
@@ -92,7 +95,7 @@ export const createNewToken = async (email: String, tokenType?: String, fingerpr
     return token;
 }
 
-export const verify = async (token: String): Promise<User | null> => {
+export const verify = async (token: string): Promise<User | null> => {
 
     const db = client.db('backlog');
     const users = db.collection('users');
@@ -113,7 +116,7 @@ export const verify = async (token: String): Promise<User | null> => {
 
 }
 
-export const invalidate = async (token: String): Promise<null | void> => {
+export const invalidate = async (token: string): Promise<null | void> => {
     const v_token = await verify(token);
     if (v_token == null) {
         return null;
@@ -144,7 +147,7 @@ export const invalidate = async (token: String): Promise<null | void> => {
     )
 }
 
-export const requestPasswordReset = async (email: String): Promise<void> => {
+export const requestPasswordReset = async (email: string): Promise<void> => {
     const db = client.db('backlog');
     const users = db.collection('users');
 
@@ -157,7 +160,7 @@ export const requestPasswordReset = async (email: String): Promise<void> => {
     }
 }
 
-export const resetPassword = async (pwResetToken: String, newPw: String): Promise<AuthToken | null> => {
+export const resetPassword = async (pwResetToken: string, newPw: string): Promise<AuthToken | null> => {
     const db = client.db('backlog');
     const users = db.collection('users');
 
@@ -195,4 +198,51 @@ export const resetPassword = async (pwResetToken: String, newPw: String): Promis
     } else {
         return null;
     }
+}
+
+const checkUserPermission = async (user: User | null, requestId: string): Promise<boolean> => {
+    if (user?.permissions.media.includes(requestId)) {
+        return true;
+    }
+    
+    user?.permissions.collection.forEach(async (collectionId: string) => {
+        const grp: MediaGroup = await find(collectionId);
+        if (grp.contents.includes(requestId)) {
+            return true;
+        }
+    })
+
+    return false;
+}
+
+export const getContentToken = async (token: string, requestId: string): Promise<AuthToken | null>  => {
+    const user = await verify(token);
+    if (user && await checkUserPermission(user, requestId)) {
+        const accessToken: AuthToken = await createNewToken(user.auth.email, 'content-access', undefined, undefined, requestId);
+        return accessToken;
+    }
+
+    return null;
+}
+
+export const verifyContentToken = async (token: string, requestId: string): Promise<boolean> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    const result = await users.findOne({
+        'tokens': {
+            $elemMatch: {
+                'invalidated': false,
+                'token': token,
+                'expires': {
+                    $gte: new Date()
+                },
+                'type': 'content-access',
+                'bonus': requestId
+            }
+        }
+    });
+
+    return result;
 }
