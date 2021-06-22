@@ -12,6 +12,7 @@ import { mediaRouter } from "./media/media.router";
 import { userRouter } from "./auth/user.router";
 import { mediaGroupRouter } from "./collection/mediagroup.router";
 import { connect } from "./sockets/sockets";
+import { verifyContentToken } from "./auth/user.service";
 
 dotenv.config();
 
@@ -45,6 +46,12 @@ app.use(helmet({
   }));
 app.use(cors());
 app.use(express.json());
+
+// app.all("*", function (req, resp, next) {
+//     console.log(req.headers);
+//     console.log(req.url);
+//     next();
+//  });
 
 app.use('/api/media', mediaRouter);
 app.use('/api/collection', mediaGroupRouter);

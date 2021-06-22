@@ -97,3 +97,40 @@ userRouter.post('/reset-password', async (req: Request, res: Response) => {
         res.status(500).json({'error': e.message});
     }
 });
+
+userRouter.post('/request-media-token', async (req: Request, res: Response) => {
+    try {
+        const token = req.body.token;
+        const media = req.body.mediaId;
+
+        const accessToken = await AuthService.getContentToken(token, media);
+        if (accessToken != null) {
+            res.status(200).json(accessToken);
+        } else {
+            res.status(401).json({authorized: false})
+        }
+    } catch (e) {
+        res.status(500).json({'error': e.message});
+    }
+});
+
+userRouter.get('/auth/:media', async (req: Request, res: Response) => {
+    try {
+        const orui = req.header('X-Original-URI');
+
+        let token = orui?.substr(orui.indexOf("token=") + 6);
+        const media = req.params.media.substr(0, req.params.media.indexOf("."));
+
+        console.log(token, media);
+
+        const ok = await AuthService.verifyContentToken(token, media);
+        if (ok) {
+            res.status(200).send();
+        } else {
+            res.status(401).send();
+        }
+        
+    } catch (e) {
+        res.status(500).json({'error': e.message});
+    }
+});
