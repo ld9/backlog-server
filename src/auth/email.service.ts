@@ -46,7 +46,7 @@ export const sendResetPasswordEmail = async (user: User): Promise<void> => {
             <div style='margin: 48px; text-align: center;'>
                 <h3>Password Reset Request for ${user.name.first}.</h3>
                 <p>If you requested that your password be reset, please use the link below to continue the password reset process. If you did not, you can ignore this message.</p>
-                <p>Please confirm that this email belongs to you, and that you wish to reset your password by <a href='${process.env.DOCUMENTROOT}/user/passwordreset/${prConfirmToken.token}'>clicking here</a>. Thank you!</p>
+                <p>Please confirm that this email belongs to you, and that you wish to reset your password by <a href='${process.env.DOCUMENTROOT}/reset-password/${prConfirmToken.token}'>clicking here</a>. Thank you!</p>
             </div>
         `
     });
