@@ -41,6 +41,18 @@ export const find = async (id: string): Promise<MediaItem> => {
     return await item;
 };
 
+export const findByUri = async (uri: string) => {
+    const db = client.db('backlog');
+    const media = db.collection('media');
+
+    const result = media.findOne({
+        uri
+    })
+    
+    return await result;
+}
+
+
 export const create = async (newItem: BaseMedia): Promise<MediaItem> => {
 
     const uri = `/media/static/${newItem.meta.title}.mp4`;

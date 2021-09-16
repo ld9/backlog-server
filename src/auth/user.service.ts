@@ -7,6 +7,7 @@ import { client } from "../index";
 import { sendPasswordUpdatedEmail, sendResetPasswordEmail, sendWelcomeEmail } from "./email.service";
 import { MediaGroup } from "../collection/mediagroup.interface";
 import { find } from "../collection/mediagroup.service";
+import { findByUri } from "../media/media.service";
 dotenv.config();
 
 export const create = async (newUserRequest: BasicUserCreate, fingerprint: Fingerprint): Promise<AuthToken | null> => {
@@ -46,6 +47,70 @@ export const create = async (newUserRequest: BasicUserCreate, fingerprint: Finge
     const firstToken = await createNewToken(newUserRequest.email, 'normal', fingerprint);
 
     return firstToken;
+}
+
+export const grantMediaPermission = async (userEmail: string, mediaId: string): Promise<boolean> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    users.updateOne({
+        'auth.email': userEmail
+    }, {
+        $push: {
+            'permissions.media': mediaId
+        }
+    })
+
+    return true;
+}
+
+export const revokeMediaPermission = async (userEmail: string, mediaId: string): Promise<boolean> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    users.updateOne({
+        'auth.email': userEmail
+    }, {
+        $pull: {
+            'permissions.media': mediaId
+        }
+    })
+
+    return true;
+}
+
+export const grantCollectionPermission = async (userEmail: string, mediaId: string): Promise<boolean> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    users.updateOne({
+        'auth.email': userEmail
+    }, {
+        $push: {
+            'permissions.collection': mediaId
+        }
+    })
+
+    return true;
+}
+
+export const revokeCollectionPermission = async (userEmail: string, mediaId: string): Promise<boolean> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    users.updateOne({
+        'auth.email': userEmail
+    }, {
+        $pull: {
+            'permissions.collection': mediaId
+        }
+    })
+
+    return true;
 }
 
 export const login = async (authUser: BasicUser, fingerprint: Fingerprint): Promise<AuthToken | null> => {
@@ -201,13 +266,17 @@ export const resetPassword = async (pwResetToken: string, newPw: string): Promis
 }
 
 const checkUserPermission = async (user: User | null, requestId: string): Promise<boolean> => {
-    if (user?.permissions.media.includes(requestId)) {
+
+    const media = await findByUri(requestId);
+    const mediaId = media._id;
+
+    if (user?.permissions.media.includes(mediaId.toString())) {
         return true;
     }
     
     user?.permissions.collection.forEach(async (collectionId: string) => {
         const grp: MediaGroup = await find(collectionId);
-        if (grp.contents.includes(requestId)) {
+        if (grp.contents.includes(mediaId)) {
             return true;
         }
     })
@@ -226,6 +295,8 @@ export const getContentToken = async (token: string, requestId: string): Promise
 }
 
 export const verifyContentToken = async (token: string, requestId: string): Promise<boolean> => {
+
+    console.log("rid", requestId);
 
     const db = client.db('backlog');
     const users = db.collection('users');
