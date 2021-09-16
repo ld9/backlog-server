@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import * as http from "http";
 
-import express from "express";
+import express, { Request } from "express";
 import cors from "cors";
 import helmet from "helmet";
 
@@ -12,7 +12,9 @@ import { mediaRouter } from "./media/media.router";
 import { userRouter } from "./auth/user.router";
 import { mediaGroupRouter } from "./collection/mediagroup.router";
 import { connect } from "./sockets/sockets";
-import { verifyContentToken } from "./auth/user.service";
+
+const fetch = require('node-fetch');
+const fileUpload = require('express-fileupload');
 
 dotenv.config();
 
@@ -43,31 +45,62 @@ export const io = new SocketServer(server);
 
 app.use(helmet({
     contentSecurityPolicy: false,
-  }));
+}));
 app.use(cors());
 app.use(express.json());
 
-// app.all("*", function (req, resp, next) {
-//     console.log(req.headers);
-//     console.log(req.url);
-//     next();
-//  });
-
+// API Routes
 app.use('/api/media', mediaRouter);
 app.use('/api/collection', mediaGroupRouter);
 app.use('/user', userRouter);
 
+//Socket.IO stuff
 io.on('connection', connect);
 
-app.get('/socket-test', (req, res) => {
-    res.set("Content-Security-Policy", "script-src 'self'");
-    res.sendFile(__dirname + '/sockets/test.html');
-})
+// File upload Stuff
+app.use(fileUpload({
+    createParentPath: true
+}));
 
-app.get('/test.js', (req, res) => {
-    res.set("Content-Security-Policy", "script-src 'self'");
-    res.sendFile(__dirname + '/sockets/test.js');
-})
+app.post('/contentupload', async (req, res) => {
+
+    try {
+        if (!(req as any).files) {
+            res.send({
+                status: false,
+                message: 'No file uploaded'
+            });
+        } else {
+            const newFile = (req as any).files.file;
+            const type = (await newFile).name.substr((await newFile).name.lastIndexOf("."), (await newFile).name.length);
+            const fileName = `${(await newFile).md5}${await (type)}`;
+
+            (await newFile).mv('/var/www/mediabacklog.com/content/restrict/' + (await fileName));
+
+            res.send({
+                status: true,
+                message: 'File is uploaded',
+                data: {
+                    name: (await fileName)
+                }
+            });
+        }
+    } catch (e) {
+        res.status(500).send(e);
+    }
+});
+
+// TMDB forward multisearches
+app.get('/tmdb/:query', async (req, res) => {
+
+    // Check authentication?!?!? (middleware)
+
+    const resp = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=c9c068dc34db03848dfa45f92157e6e3&query=${req.params.query}`);
+    const json = await resp.json();
+
+    res.send(json);
+});
+
 
 server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
