@@ -10,6 +10,17 @@ import { find } from "../collection/mediagroup.service";
 import { findByUri } from "../media/media.service";
 dotenv.config();
 
+export const findAll = async (): Promise<User[]> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    const result = await users.find().project({tokens:0,recent:0,"auth.hash":0});
+
+    return result.toArray();
+
+}
+
 export const create = async (newUserRequest: BasicUserCreate, fingerprint: Fingerprint): Promise<AuthToken | null> => {
 
     const hash = await bcrypt.hash(newUserRequest.password, 12);
@@ -190,7 +201,7 @@ export const invalidate = async (token: string): Promise<null | void> => {
     const db = client.db('backlog');
     const users = db.collection('users');
 
-    
+
     const result = users.updateOne(
         {
             'tokens': {
@@ -273,7 +284,7 @@ const checkUserPermission = async (user: User | null, requestId: string): Promis
     if (user?.permissions.media.includes(mediaId.toString())) {
         return true;
     }
-    
+
     user?.permissions.collection.forEach(async (collectionId: string) => {
         const grp: MediaGroup = await find(collectionId);
         if (grp.contents.includes(mediaId)) {
@@ -284,7 +295,7 @@ const checkUserPermission = async (user: User | null, requestId: string): Promis
     return false;
 }
 
-export const getContentToken = async (token: string, requestId: string): Promise<AuthToken | null>  => {
+export const getContentToken = async (token: string, requestId: string): Promise<AuthToken | null> => {
     const user = await verify(token);
     if (user && await checkUserPermission(user, requestId)) {
         const accessToken: AuthToken = await createNewToken(user.auth.email, 'content-access', undefined, undefined, requestId);
