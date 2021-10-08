@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { find, getCollectionPermissions } from "../collection/mediagroup.service";
 import { BaseMedia, MediaItem } from "./media.interface";
 import * as MediaService from "./media.service"
 
@@ -15,17 +16,29 @@ mediaRouter.get("/", async (req: Request, res: Response) => {
 
     try {
         const items = await MediaService.findAllForUser(bt);
+        const collectionPerms = await getCollectionPermissions(bt);
+        let collectionItems = await Promise.all(collectionPerms.map((id) => MediaService.find(id)));
+
 
         if (items === null) {
             res.status(403).send();
             return;
         }
 
-        res.status(200).send(items);
+        res.status(200).send([...items, ...collectionItems]);
     } catch (e) {
         res.status(500).json({'error': e.message});
     }
 })
+
+mediaRouter.get("/catalog", async (req: Request, res: Response) => {
+    try {
+        const items = await MediaService.findAll();
+        res.status(200).send(items);
+    } catch (e) {
+        res.status(500).json({'error': e.message});
+    }
+});
 
 mediaRouter.get("/:id", async (req: Request, res: Response) => {
     try {
@@ -33,6 +46,7 @@ mediaRouter.get("/:id", async (req: Request, res: Response) => {
         if (item) {
             return res.status(200).send(item);
         }
+        console.log(item);
 
         res.status(404).json({'error': 'No such media'});
     } catch (e) {

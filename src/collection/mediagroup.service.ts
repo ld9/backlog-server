@@ -29,6 +29,24 @@ export const create = async (newItem: MediaGroup): Promise<MediaGroup> => {
     return await result.ops[0];
 }
 
+export const getCollectionPermissions = async (user: string): Promise<Array<string>> => {
+
+    const db = client.db('backlog');
+    const groups = db.collection('collections');
+
+    const result = groups.find({members:'6099c16ab4dd4326c43df98a'});
+    const proj = await result.project({'contents': 1}).toArray();
+    
+    let res: Array<string> = [];
+    proj.forEach(doc => {
+        res = [...res, ...doc.contents];
+    })
+
+    console.log(res);
+    return res;
+
+}
+
 export const update = async (id: string, itemUpdate: MediaGroup): Promise<Object | null> => {
     
     const group = await find(id);

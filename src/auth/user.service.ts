@@ -6,8 +6,9 @@ import crypto from "crypto";
 import { client } from "../index";
 import { sendPasswordUpdatedEmail, sendResetPasswordEmail, sendWelcomeEmail } from "./email.service";
 import { MediaGroup } from "../collection/mediagroup.interface";
-import { find } from "../collection/mediagroup.service";
+import { find, getCollectionPermissions } from "../collection/mediagroup.service";
 import { findByUri } from "../media/media.service";
+import { ObjectID } from "bson";
 dotenv.config();
 
 export const findOne = async (id: any): Promise<User[]> => {
@@ -38,7 +39,7 @@ export const findAll = async (): Promise<User[]> => {
     const db = client.db('backlog');
     const users = db.collection('users');
 
-    const result = await users.find().project({tokens:0,recent:0,"auth.hash":0});
+    const result = await users.find().project({ tokens: 0, recent: 0, "auth.hash": 0 });
 
     return result.toArray();
 
@@ -308,12 +309,9 @@ const checkUserPermission = async (user: User | null, requestId: string): Promis
         return true;
     }
 
-    user?.permissions.collection.forEach(async (collectionId: string) => {
-        const grp: MediaGroup = await find(collectionId);
-        if (grp.contents.includes(mediaId)) {
-            return true;
-        }
-    })
+    if ((await getCollectionPermissions(user?._id)).includes(mediaId.toString())) {
+        return true;
+    }
 
     return false;
 }

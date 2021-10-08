@@ -9,7 +9,7 @@ mediaGroupRouter.get("/", async (req: Request, res: Response) => {
         const groups = await MediaGroupService.findAll();
         res.status(200).json(groups);
     } catch (e) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -19,10 +19,10 @@ mediaGroupRouter.get("/:id", async (req: Request, res: Response) => {
         if (group) {
             return res.status(200).json(group);
         }
-        
-        res.status(404).json({'error': 'No such group'});
+
+        res.status(404).json({ 'error': 'No such group' });
     } catch (e) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -61,6 +61,6 @@ mediaGroupRouter.delete("/:id", async (req: Request, res: Response) => {
         await MediaGroupService.remove(req.body.id);
         res.status(204).send();
     } catch (e) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
