@@ -29,10 +29,11 @@ export const create = async (newItem: MediaGroup): Promise<MediaGroup> => {
     return await result.ops[0];
 }
 
-export const update = async (id: string, itemUpdate: MediaGroup): Promise<MediaGroup | null> => {
+export const update = async (id: string, itemUpdate: MediaGroup): Promise<Object | null> => {
     
     const group = await find(id);
     if (!group) {
+        console.log('nogroup')
         return null;
     }
 
@@ -41,10 +42,14 @@ export const update = async (id: string, itemUpdate: MediaGroup): Promise<MediaG
 
     const result = groups.updateOne(
         { '_id': group._id },
-        { ...itemUpdate }
+        { $set: {
+            title: itemUpdate.title,
+            contents: itemUpdate.contents,
+            members: itemUpdate.members
+        } }
     )
 
-    return groups.findOne({ '_id': group._id });
+    return (await result);
 }
 
 export const remove = async (id: string): Promise<null | void> => {
