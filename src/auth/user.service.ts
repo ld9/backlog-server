@@ -8,7 +8,7 @@ import { sendPasswordUpdatedEmail, sendResetPasswordEmail, sendWelcomeEmail } fr
 import { MediaGroup } from "../collection/mediagroup.interface";
 import { find, getCollectionPermissions } from "../collection/mediagroup.service";
 import { findByUri } from "../media/media.service";
-import { ObjectID } from "bson";
+import { ObjectId, ObjectID } from "bson";
 dotenv.config();
 
 export const findOne = async (id: any): Promise<User[]> => {
@@ -43,6 +43,17 @@ export const findAll = async (): Promise<User[]> => {
 
     return result.toArray();
 
+}
+
+export const updateRecents = async (userId: string, mediaId: string, type: string): Promise<Object | undefined> => {
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    if (type == 'audio') {
+        return await (await users.updateOne({ '_id': new ObjectID(userId) }, { '$push': { 'recent.audio': mediaId } })).result;
+    } else if (type == 'video') {
+        return await (await users.updateOne({ '_id': new ObjectID(userId) }, { '$push': { 'recent.video': mediaId } })).result;
+    }
 }
 
 export const create = async (newUserRequest: BasicUserCreate, fingerprint: Fingerprint): Promise<AuthToken | null> => {

@@ -29,6 +29,7 @@ userRouter.post('/verify', async (req: Request, res: Response) => {
         if (user != null) {
 
             const resUser = {
+                _id: user._id,
                 name: user.name,
                 permissions: user.permissions,
                 recent: user.recent
@@ -202,3 +203,15 @@ userRouter.post('/revoke-collection', async (req: Request, res: Response) => {
         res.status(500).json({'error': e.message});
     }
 });
+
+userRouter.post('/recent', async (req: Request, res: Response) => {
+
+    console.log(req.body);
+    
+
+    try {
+        res.status(200).json(await (AuthService.updateRecents(req.body.user, req.body.media, req.body.type)))
+    } catch (e: any) {
+        res.status(500).json({'error': e.message});
+    }
+})
