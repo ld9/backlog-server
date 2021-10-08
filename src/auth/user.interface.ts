@@ -14,6 +14,7 @@ export interface BasicUserCreate extends BasicUser {
 }
 
 export interface User {
+    _id: any;
     name: PersonName;
     auth: UserAuth;
     tokens: Array<AuthToken>;
