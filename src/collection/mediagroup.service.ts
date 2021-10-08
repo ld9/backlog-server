@@ -24,7 +24,7 @@ export const create = async (newItem: MediaGroup): Promise<MediaGroup> => {
     const db = client.db('backlog');
     const groups = db.collection('collections');
     
-    const result = await groups.insertOne({ newItem });
+    const result = await groups.insertOne(newItem);
 
     return await result.ops[0];
 }

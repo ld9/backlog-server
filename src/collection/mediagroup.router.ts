@@ -29,12 +29,15 @@ mediaGroupRouter.get("/:id", async (req: Request, res: Response) => {
 mediaGroupRouter.post("/", async (req: Request, res: Response) => {
     try {
         const mg: MediaGroup = req.body;
-        const group = MediaGroupService.create(mg);
+        console.log(mg);
+
+        let group = MediaGroupService.create(mg);
+
 
         res.status(200).json(group);
 
     } catch (e) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
