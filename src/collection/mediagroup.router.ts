@@ -43,13 +43,16 @@ mediaGroupRouter.post("/", async (req: Request, res: Response) => {
 
 mediaGroupRouter.put("/:id", async (req: Request, res: Response) => {
     try {
-        const mg: MediaGroup = req.body;
-        const group = MediaGroupService.update(mg._id, mg);
+        const mg = req.body;
+
+        console.log(req.params.id, mg);
+
+        const group = MediaGroupService.update(req.params.id, mg);
 
         res.status(200).json(group);
 
     } catch (e) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
