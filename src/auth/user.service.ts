@@ -10,6 +10,29 @@ import { find } from "../collection/mediagroup.service";
 import { findByUri } from "../media/media.service";
 dotenv.config();
 
+export const findOne = async (id: any): Promise<User[]> => {
+
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    const result = await users.findOne({ "_id": new ObjectID(id) }, { projection: { tokens: 0, recent: 0, "auth.hash": 0 } });
+    const collectionPerms = await getCollectionPermissions(id);
+
+    const incl = {
+        ...result,
+        permissions: {
+            ...result.permissions,
+            media: [
+                ...result.permissions.media,
+                ...collectionPerms
+            ]
+        }
+    }
+
+    return incl;
+
+}
+
 export const findAll = async (): Promise<User[]> => {
 
     const db = client.db('backlog');

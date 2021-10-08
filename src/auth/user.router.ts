@@ -148,6 +148,18 @@ userRouter.get('/directory', async (req: Request, res: Response) => {
 
 });
 
+userRouter.get('/find/:id', async (req: Request, res: Response) => {
+
+    try {
+        const users = await AuthService.findOne(req.params.id);
+
+        res.status(200).json(users);
+    } catch (e: any) {
+        res.status(500).json({'error': e.message});
+    }
+
+});
+
 
 // granting and revoking permissions
 
