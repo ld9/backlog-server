@@ -210,7 +210,7 @@ userRouter.post('/recent', async (req: Request, res: Response) => {
     
 
     try {
-        res.status(200).json(await (AuthService.updateRecents(req.body.user, req.body.media, req.body.type)))
+        res.status(200).json(await (AuthService.updateRecents(req.body.user, req.body.payload, req.body.type)))
     } catch (e: any) {
         res.status(500).json({'error': e.message});
     }

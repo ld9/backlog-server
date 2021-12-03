@@ -45,15 +45,38 @@ export const findAll = async (): Promise<User[]> => {
 
 }
 
-export const updateRecents = async (userId: string, mediaId: string, type: string): Promise<Object | undefined> => {
+export const updateRecents = async (userId: string, mediaPayload: string, type: string): Promise<Object | undefined> => {
     const db = client.db('backlog');
     const users = db.collection('users');
 
-    if (type == 'audio') {
-        return await (await users.updateOne({ '_id': new ObjectID(userId) }, { '$push': { 'recent.audio': mediaId } })).result;
-    } else if (type == 'video') {
-        return await (await users.updateOne({ '_id': new ObjectID(userId) }, { '$push': { 'recent.video': mediaId } })).result;
+    if (type != 'video' && type != 'audio') {
+        throw new Error('Invalid media type detected.');
     }
+
+    const { mediaId } = (mediaPayload as any);
+
+    let res = await (await users.updateOne({
+        '_id': new ObjectID(userId),
+        [`recent.${type}.mediaId`]: mediaId
+    }, {
+        '$set': {
+            [`recent.${type}.$`]: mediaPayload
+        }
+    }
+    )).result;
+
+    if (res.n == 0) {
+        res = await (await users.updateOne({
+            '_id': new ObjectID(userId)
+        }, {
+            '$push': {
+                [`recent.${type}`]: mediaPayload
+            }
+        }
+        )).result;
+    }
+
+    return res;
 }
 
 export const create = async (newUserRequest: BasicUserCreate, fingerprint: Fingerprint): Promise<AuthToken | null> => {
