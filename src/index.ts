@@ -92,10 +92,7 @@ app.post('/contentupload', async (req, res) => {
 
 // TMDB forward multisearches
 app.get('/tmdb/:query', async (req, res) => {
-
-    // Check authentication?!?!? (middleware)
-
-    const resp = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=c9c068dc34db03848dfa45f92157e6e3&query=${req.params.query}`);
+    const resp = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${process.env.TMDBKEY}&query=${req.params.query}`);
     const json = await resp.json();
 
     res.send(json);
