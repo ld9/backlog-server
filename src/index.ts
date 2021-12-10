@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import * as http from "http";
+import * as child from "child_process";
 
 import express, { Request } from "express";
 import cors from "cors";
@@ -84,6 +85,30 @@ app.post('/contentupload', async (req, res) => {
                     name: (await fileName)
                 }
             });
+
+
+            if (type === '.mp4') {
+
+                console.log('reformatting')
+                let process: child.ChildProcess = child.exec(`ffmpeg -i /var/www/mediabacklog.com/content/restrict/${fileName} -vcodec libx264 -crf 28 ${newFile.md5}.mp4`);
+                process.on('exit', () => {
+                    child.exec(`mv ${newFile.md5}.mp4 /var/www/mediabacklog.com/content/restrict/${newFile.md5}.mp4`);
+
+                    console.log('reformatted')
+                })
+
+                // const buffer = await data.buffer();
+                // const base64 = buffer.toString('base64');
+
+                // const video = {
+                //     name: (await fileName),
+                //     base64: base64,
+                //     type: 'video'
+                // };
+
+                // const collection = client.db("mediabacklog").collection("content");
+                // await collection.insertOne(video);
+            }
         }
     } catch (e) {
         res.status(500).send(e);
