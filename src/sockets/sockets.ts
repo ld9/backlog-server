@@ -10,9 +10,9 @@ function peerInform(socket: Socket, payload: string, toSelf?: boolean) {
         console.log("!! Potential fake packet detected");
         // return;
     }
-    
+
     if (count++ % 100 == 0) {
-        console.log(`peerinform #${count} sent`);
+        // console.log(`peerinform #${count} sent`);
     }
 
     socket.rooms.forEach(async (room) => {
@@ -48,7 +48,7 @@ export function connect(socket: Socket) {
         console.log(obj);
         let stage = obj.stage;
         let user = obj.user;
-        
+
         socket.join(stage);
 
         console.log(`Socket ${socket} attempt join room ${stage}`);

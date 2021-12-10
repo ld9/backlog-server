@@ -3,6 +3,7 @@ import { MediaGroup } from './mediagroup.interface';
 import { ObjectId } from "mongodb";
 import { client } from '../index';
 import { mediaRouter } from '../media/media.router';
+import { verify } from '../auth/user.service';
 
 export const findAll = async (): Promise<MediaGroup[]> => {
     const db = client.db('backlog');
@@ -23,32 +24,37 @@ export const find = async (id: string): Promise<MediaGroup> => {
 export const create = async (newItem: MediaGroup): Promise<MediaGroup> => {
     const db = client.db('backlog');
     const groups = db.collection('collections');
-    
+
     const result = await groups.insertOne(newItem);
 
     return await result.ops[0];
 }
 
-export const getCollectionPermissions = async (user: string): Promise<Array<string>> => {
+export const getCollectionPermissions = async (userId: string): Promise<Array<string>> => {
 
     const db = client.db('backlog');
     const groups = db.collection('collections');
 
-    const result = groups.find({members:'6099c16ab4dd4326c43df98a'});
-    const proj = await result.project({'contents': 1}).toArray();
-    
+    // const user = await verify(token);
+    // console.log('39', user, token)
+    // if (!user) {
+    //     return [];
+    // }
+
+    const result = groups.find({ members: `${userId}` });
+    const proj = await result.project({ 'contents': 1 }).toArray();
+
     let res: Array<string> = [];
     proj.forEach(doc => {
         res = [...res, ...doc.contents];
     })
 
-    console.log(res);
     return res;
 
 }
 
 export const update = async (id: string, itemUpdate: MediaGroup): Promise<Object | null> => {
-    
+
     const group = await find(id);
     if (!group) {
         console.log('nogroup')
@@ -60,11 +66,13 @@ export const update = async (id: string, itemUpdate: MediaGroup): Promise<Object
 
     const result = groups.updateOne(
         { '_id': group._id },
-        { $set: {
-            title: itemUpdate.title,
-            contents: itemUpdate.contents,
-            members: itemUpdate.members
-        } }
+        {
+            $set: {
+                title: itemUpdate.title,
+                contents: itemUpdate.contents,
+                members: itemUpdate.members
+            }
+        }
     )
 
     return (await result);
