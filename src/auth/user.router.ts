@@ -16,11 +16,23 @@ userRouter.post('/create', async (req: Request, res: Response) => {
         const newUser: AuthToken | null = await AuthService.create(user, fingerprint);
 
         res.status(200).json(newUser);
-        
+
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
+
+userRouter.put('/update', async (req: Request, res: Response) => {
+    try {
+        const user: User = req.body;
+        const updatedUser: User | null = await AuthService.update(user);
+
+        res.status(200).json(updatedUser);
+
+    } catch (e: any) {
+        res.status(500).json({ 'error': e.message });
+    }
+})
 
 userRouter.post('/verify', async (req: Request, res: Response) => {
     try {
@@ -39,11 +51,11 @@ userRouter.post('/verify', async (req: Request, res: Response) => {
                 auth: resUser
             });
         } else {
-            res.status(401).json({auth: false});
+            res.status(401).json({ auth: false });
         }
 
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -61,11 +73,11 @@ userRouter.post('/login', async (req: Request, res: Response) => {
         if (login != null) {
             res.status(200).json(login);
         } else {
-            res.status(401).json({auth: false});
+            res.status(401).json({ auth: false });
         }
 
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -75,8 +87,8 @@ userRouter.delete('/invalidate', async (req: Request, res: Response) => {
 
         res.status(204).send();
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
-    } 
+        res.status(500).json({ 'error': e.message });
+    }
 });
 
 userRouter.post('/request-reset-password', async (req: Request, res: Response) => {
@@ -85,7 +97,7 @@ userRouter.post('/request-reset-password', async (req: Request, res: Response) =
 
         res.status(200).send(true);
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -95,7 +107,7 @@ userRouter.post('/reset-password', async (req: Request, res: Response) => {
 
         res.status(200).json(newToken);
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -108,10 +120,10 @@ userRouter.post('/request-media-token', async (req: Request, res: Response) => {
         if (accessToken != null) {
             res.status(200).json(accessToken);
         } else {
-            res.status(401).json({authorized: false})
+            res.status(401).json({ authorized: false })
         }
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -130,9 +142,9 @@ userRouter.get('/auth/:media', async (req: Request, res: Response) => {
         } else {
             res.status(401).send();
         }
-        
+
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -144,7 +156,7 @@ userRouter.get('/directory', async (req: Request, res: Response) => {
 
         res.status(200).json(users);
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 
 });
@@ -156,7 +168,7 @@ userRouter.get('/find/:id', async (req: Request, res: Response) => {
 
         res.status(200).json(users);
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 
 });
@@ -170,7 +182,7 @@ userRouter.post('/grant-media', async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -180,7 +192,7 @@ userRouter.post('/revoke-media', async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -190,7 +202,7 @@ userRouter.post('/grant-collection', async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
@@ -200,18 +212,18 @@ userRouter.post('/revoke-collection', async (req: Request, res: Response) => {
 
         res.status(200).send();
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 });
 
 userRouter.post('/recent', async (req: Request, res: Response) => {
 
     console.log(req.body);
-    
+
 
     try {
         res.status(200).json(await (AuthService.updateRecents(req.body.user, req.body.payload, req.body.type)))
     } catch (e: any) {
-        res.status(500).json({'error': e.message});
+        res.status(500).json({ 'error': e.message });
     }
 })

@@ -383,3 +383,22 @@ export const verifyContentToken = async (token: string, requestId: string): Prom
 
     return result;
 }
+
+export const update = async (user: User): Promise<boolean> => {
+    const db = client.db('backlog');
+    const users = db.collection('users');
+
+    const result = await users.updateOne(
+        {
+            '_id': new ObjectId(user._id)
+        },
+        {
+            $set: {
+                'name': user.name,
+                'auth.email': user.auth.email,
+            }
+        }
+    );
+
+    return result.result.ok == 1;
+}
