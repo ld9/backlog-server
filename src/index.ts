@@ -123,6 +123,26 @@ app.get('/tmdb/:query', async (req, res) => {
     res.send(json);
 });
 
+app.get('/fs', async (req, res) => {
+    const line = child.execSync('df -h | grep ^/dev/sda1.*\/$').toString();
+    const regex = /\/sda1.+(\d.+G|M|K).+(\d.+G|M|K).+(\d.+G|M|K).+(\d.+%)/gm;
+    let m;
+
+    while ((m = regex.exec(line)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+
+        // The result can be accessed through the `m`-variable.
+        res.send({
+            total: m[1],
+            used: m[2],
+            free: m[3],
+            percent: m[4]
+        })
+    }
+})
 
 server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
